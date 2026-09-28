@@ -121,12 +121,41 @@ answers the user's question.
 def validation_router(state: ResearchState):
 
     if state["is_valid"]:
-        return "end"
+        return "report"
 
     if state["attempts"] >= 3:
-        return "end"
+        return "report"
 
     return "search"
+
+def report_node(state: ResearchState):
+
+    question = state["question"]
+    information = state["extracted_information"]
+
+    prompt = f"""
+You are a research report writer.
+
+User's question:
+{question}
+
+Validated research information:
+{information}
+
+Create a clear and concise final research report.
+
+Requirements:
+- Directly answer the user's question
+- Organize the information logically
+- Do not add information that is not present in the research
+- Keep the answer easy to understand
+"""
+
+    response = model.invoke(prompt)
+
+    return {
+        "extracted_information": response.content
+    }
 
 
 graph = StateGraph(ResearchState)
@@ -135,6 +164,7 @@ graph.add_node("search", search_node)
 graph.add_node("scrape", scrape_node)
 graph.add_node("extract", extract_node)
 graph.add_node("validate", validate_node)
+graph.add_node("report", report_node)
 
 graph.add_edge(START, "search")
 graph.add_edge("search", "scrape")
@@ -146,8 +176,10 @@ graph.add_conditional_edges(
     validation_router,
     {
         "search": "search",
-        "end": END
+        "report": "report"
     }
 )
+
+graph.add_edge("report", END)
 
 research_graph = graph.compile()
