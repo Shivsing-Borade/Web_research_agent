@@ -1,0 +1,10 @@
+langgraph
+langchain
+langchain-huggingface
+huggingface_hub
+langchain-community
+ddgs
+requests
+beautifulsoup4
+python-dotenv
+pydantic
