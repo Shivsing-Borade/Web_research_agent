@@ -105,7 +105,7 @@ answers the user's question.
         }
     )
 
-    chain = template | model | parser
+    chain = template | validation_model | parser
 
     result = chain.invoke({
         "question": state["question"],
